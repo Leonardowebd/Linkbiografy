@@ -6,7 +6,7 @@ import imgVanguarda from "figma:asset/328a713f1e59c5ef92b21c633b6703ee8a257505.p
 import svgPaths from "../imports/Desktop1/svg-8r1b22f4xs";
 import hostingerSvg from "../imports/Vector/svg-fwepso0duv";
 import hostingerSvg2 from "../imports/Vector-1/svg-9qtctz56h5";
-import faviconSrc from "../imports/image.png";
+import faviconSrc from "../imports/image-1.png";
 
 // ─── SEO + favicon injection ───────────────────────────────────────────────
 function useSEO() {
