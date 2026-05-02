@@ -1,13 +1,93 @@
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import Rectangle from "../imports/Rectangle15/Rectangle15";
 import imgDiagnostico from "figma:asset/219f36972a48af087aff464629a32bc21323d345.png";
 import imgVanguarda from "figma:asset/328a713f1e59c5ef92b21c633b6703ee8a257505.png";
 import svgPaths from "../imports/Desktop1/svg-8r1b22f4xs";
 import hostingerSvg from "../imports/Vector/svg-fwepso0duv";
 import hostingerSvg2 from "../imports/Vector-1/svg-9qtctz56h5";
+import faviconSrc from "../imports/image.png";
 
-// Corner bracket decorator component
+// ─── SEO + favicon injection ───────────────────────────────────────────────
+function useSEO() {
+  useEffect(() => {
+    // Title
+    document.title = "Leoaragão.1 — IA, Tecnologia & Negócios";
+
+    const setMeta = (
+      attr: "name" | "property",
+      value: string,
+      content: string
+    ) => {
+      let el = document.querySelector(
+        `meta[${attr}="${value}"]`
+      ) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, value);
+        document.head.appendChild(el);
+      }
+      el.content = content;
+    };
+
+    // Primary
+    setMeta("name", "description", "Leonardo Aragão — IA First. Diagnóstico IA, Vanguarda.club, Paperclip e muito mais.");
+    setMeta("name", "keywords", "IA, inteligência artificial, automação, Leonardo Aragão, Vanguarda, Paperclip, tecnologia");
+    setMeta("name", "author", "Leonardo Aragão");
+    setMeta("name", "robots", "index, follow");
+    setMeta("name", "theme-color", "#000000");
+
+    // Open Graph
+    setMeta("property", "og:type", "website");
+    setMeta("property", "og:title", "Leoaragão.1 — IA, Tecnologia & Negócios");
+    setMeta("property", "og:description", "Leonardo Aragão — IA First. Diagnóstico IA, Vanguarda.club, Paperclip e muito mais.");
+    setMeta("property", "og:image", faviconSrc);
+    setMeta("property", "og:locale", "pt_BR");
+
+    // Twitter Card
+    setMeta("name", "twitter:card", "summary_large_image");
+    setMeta("name", "twitter:title", "Leoaragão.1 — IA, Tecnologia & Negócios");
+    setMeta("name", "twitter:description", "Leonardo Aragão — IA First. Diagnóstico IA, Vanguarda.club, Paperclip e muito mais.");
+    setMeta("name", "twitter:image", faviconSrc);
+
+    // Favicon
+    let favicon = document.querySelector("link[rel~='icon']") as HTMLLinkElement | null;
+    if (!favicon) {
+      favicon = document.createElement("link");
+      favicon.rel = "icon";
+      document.head.appendChild(favicon);
+    }
+    favicon.type = "image/png";
+    favicon.href = faviconSrc;
+
+    // Apple touch icon
+    let appleIcon = document.querySelector("link[rel='apple-touch-icon']") as HTMLLinkElement | null;
+    if (!appleIcon) {
+      appleIcon = document.createElement("link");
+      appleIcon.rel = "apple-touch-icon";
+      document.head.appendChild(appleIcon);
+    }
+    appleIcon.href = faviconSrc;
+
+    // Preconnect to speed up external resources
+    const preconnects = [
+      "https://fonts.googleapis.com",
+      "https://fonts.gstatic.com",
+      "https://cdn.jsdelivr.net",
+    ];
+    preconnects.forEach((href) => {
+      if (!document.querySelector(`link[rel="preconnect"][href="${href}"]`)) {
+        const link = document.createElement("link");
+        link.rel = "preconnect";
+        link.href = href;
+        if (href.includes("gstatic")) link.crossOrigin = "anonymous";
+        document.head.appendChild(link);
+      }
+    });
+  }, []);
+}
+
+// ─── Corner bracket decorator ──────────────────────────────────────────────
 function CornerBrackets({ color = "#12a0fa" }: { color?: string }) {
   const dotStyle = `absolute bg-white border border-solid size-[6px]`;
   return (
@@ -20,7 +100,7 @@ function CornerBrackets({ color = "#12a0fa" }: { color?: string }) {
   );
 }
 
-// Social icon button with corner brackets
+// ─── Social icon button ────────────────────────────────────────────────────
 function SocialIcon({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative size-[56px]">
@@ -33,7 +113,7 @@ function SocialIcon({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Large card with image background (Diagnóstico IA & Vanguarda.club)
+// ─── Large card (image background) ────────────────────────────────────────
 function ImageCard({
   title,
   description,
@@ -41,6 +121,7 @@ function ImageCard({
   imgPosition,
   borderColor = "#2367f9",
   href,
+  priority = false,
 }: {
   title: string;
   description: string;
@@ -48,15 +129,17 @@ function ImageCard({
   imgPosition: { top: string; left: string; width: string; height: string };
   borderColor?: string;
   href?: string;
+  priority?: boolean;
 }) {
   const inner = (
     <div className="relative w-full" style={{ height: 182 }}>
-      {/* Background image */}
       <div className="absolute inset-0 overflow-hidden">
         <img
           alt=""
           className="absolute max-w-none"
           src={bgImage}
+          loading={priority ? "eager" : "lazy"}
+          decoding={priority ? "auto" : "async"}
           style={{
             top: imgPosition.top,
             left: imgPosition.left,
@@ -65,7 +148,6 @@ function ImageCard({
           }}
         />
       </div>
-      {/* Blue gradient overlay */}
       <div
         className="absolute inset-0"
         style={{
@@ -73,9 +155,7 @@ function ImageCard({
             "url('data:image/svg+xml;utf8,<svg viewBox=\\'0 0 356 182\\' xmlns=\\'http://www.w3.org/2000/svg\\' preserveAspectRatio=\\'none\\'><rect x=\\'0\\' y=\\'0\\' height=\\'100%\\' width=\\'100%\\' fill=\\'url(%23grad)\\' opacity=\\'1\\'/><defs><radialGradient id=\\'grad\\' gradientUnits=\\'userSpaceOnUse\\' cx=\\'0\\' cy=\\'0\\' r=\\'10\\' gradientTransform=\\'matrix(-12.95 30.45 -59.562 -25.331 374 -42.5)\\'><stop stop-color=\\'rgba(18,160,250,0)\\' offset=\\'0.091597\\'/><stop stop-color=\\'rgba(0,87,226,1)\\' offset=\\'0.58789\\'/></radialGradient></defs></svg>')",
         }}
       />
-      {/* White border */}
       <div className="absolute inset-0 border border-solid border-white pointer-events-none" />
-      {/* Content */}
       <div className="absolute inset-0 flex flex-col gap-[8px] items-start justify-end p-[10px]">
         <p
           className="shrink-0 xs:text-[20px] text-white whitespace-nowrap text-[24px]"
@@ -90,7 +170,6 @@ function ImageCard({
           {description}
         </p>
       </div>
-      {/* Corner brackets */}
       <CornerBrackets color={borderColor} />
     </div>
   );
@@ -101,7 +180,7 @@ function ImageCard({
   ) : inner;
 }
 
-// Small card with icon (Paperclip & Vanguarda.squads)
+// ─── Small card (icon) ─────────────────────────────────────────────────────
 function IconCard({
   iconPath,
   iconViewBox,
@@ -121,7 +200,6 @@ function IconCard({
 }) {
   const inner = (
     <div className="relative w-full" style={{ height: 118 }}>
-      {/* Blue gradient bg */}
       <div
         className="absolute inset-0"
         style={{
@@ -129,16 +207,10 @@ function IconCard({
             "url('data:image/svg+xml;utf8,<svg viewBox=\\'0 0 356 118\\' xmlns=\\'http://www.w3.org/2000/svg\\' preserveAspectRatio=\\'none\\'><rect x=\\'0\\' y=\\'0\\' height=\\'100%\\' width=\\'100%\\' fill=\\'url(%23grad)\\' opacity=\\'1\\'/><defs><radialGradient id=\\'grad\\' gradientUnits=\\'userSpaceOnUse\\' cx=\\'0\\' cy=\\'0\\' r=\\'10\\' gradientTransform=\\'matrix(-12.95 19.742 -59.562 -16.423 374 -27.555)\\'><stop stop-color=\\'rgba(18,160,250,0)\\' offset=\\'0.091597\\'/><stop stop-color=\\'rgba(0,87,226,1)\\' offset=\\'0.58789\\'/></radialGradient></defs></svg>')",
         }}
       />
-      {/* White border */}
       <div className="absolute inset-0 border border-solid border-white pointer-events-none" />
-      {/* Content */}
       <div className="absolute inset-0 flex flex-col gap-[8px] items-start justify-end p-[10px]">
         <div className="flex gap-[10px] items-center justify-center">
-          <svg
-            fill="none"
-            viewBox={iconViewBox}
-            style={{ width: iconW, height: iconH, flexShrink: 0 }}
-          >
+          <svg fill="none" viewBox={iconViewBox} style={{ width: iconW, height: iconH, flexShrink: 0 }}>
             <path d={iconPath} fill="white" />
           </svg>
           <p
@@ -155,7 +227,6 @@ function IconCard({
           {description}
         </p>
       </div>
-      {/* Corner brackets */}
       <CornerBrackets color="#12a0fa" />
     </div>
   );
@@ -166,7 +237,7 @@ function IconCard({
   ) : inner;
 }
 
-// "Em breve" popup
+// ─── Em breve popup ────────────────────────────────────────────────────────
 function EmBrevePopup({ onClose }: { onClose: () => void }) {
   return (
     <div
@@ -204,10 +275,10 @@ function EmBrevePopup({ onClose }: { onClose: () => void }) {
   );
 }
 
-// UnicornStudio background component
-function UnicornBackground() {
+// ─── UnicornStudio background ──────────────────────────────────────────────
+function UnicornBackground({ onReady }: { onReady: () => void }) {
   useEffect(() => {
-    // Inject CSS to hide the watermark regardless of class name
+    // Hide watermark via CSS
     const styleId = "us-hide-watermark";
     if (!document.getElementById(styleId)) {
       const style = document.createElement("style");
@@ -230,7 +301,7 @@ function UnicornBackground() {
       document.head.appendChild(style);
     }
 
-    // MutationObserver: remove any injected watermark node
+    // MutationObserver to aggressively kill any injected watermark
     const killWatermark = () => {
       document.querySelectorAll("a, [class], [id]").forEach((el) => {
         const href = (el as HTMLAnchorElement).href ?? "";
@@ -257,44 +328,70 @@ function UnicornBackground() {
 
     const observer = new MutationObserver(killWatermark);
     observer.observe(document.documentElement, { childList: true, subtree: true });
-    // Run once immediately in case elements already exist
     killWatermark();
 
+    // Load UnicornStudio SDK once
     const existingScript = document.getElementById("unicornstudio-script");
-    if (existingScript) {
+    const initUS = () => {
       const u = (window as any).UnicornStudio;
       if (u && u.init) u.init();
+      // Signal app is ready to reveal
+      setTimeout(() => {
+        killWatermark();
+        onReady();
+      }, 400);
+      setTimeout(killWatermark, 1200);
+    };
+
+    if (existingScript) {
+      if ((window as any).UnicornStudio) {
+        initUS();
+      } else {
+        existingScript.addEventListener("load", initUS, { once: true });
+      }
       return () => observer.disconnect();
     }
+
     const script = document.createElement("script");
     script.id = "unicornstudio-script";
     script.src =
       "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.11/dist/unicornStudio.umd.js";
-    script.onload = () => {
-      const u = (window as any).UnicornStudio;
-      if (u && u.init) u.init();
-      // Run again after init
-      setTimeout(killWatermark, 500);
-      setTimeout(killWatermark, 1500);
-    };
+    script.async = true;
+    script.defer = true;
+    script.onload = initUS;
+    // Fallback: reveal even if script fails
+    script.onerror = () => { onReady(); observer.disconnect(); };
     (document.head || document.body).appendChild(script);
-    return () => observer.disconnect();
+
+    // Safety fallback — reveal after 3 s regardless
+    const fallback = setTimeout(() => { killWatermark(); onReady(); }, 3000);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(fallback);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div
+      className="absolute inset-0 overflow-hidden pointer-events-none"
+      style={{ zIndex: 0 }}
+    >
       <div
         data-us-project="EgvoZC7eDXsErT3Z1FOQ"
         style={{ width: "100%", height: "100%" }}
       />
-      {/* Fixed black patch over the bottom-right watermark position */}
-      
     </div>
   );
 }
 
+// ─── App ───────────────────────────────────────────────────────────────────
 export default function App() {
+  useSEO();
+
   const [showEmBreve, setShowEmBreve] = useState(false);
+  const [pageLoaded, setPageLoaded] = useState(false);
 
   const revealVariants = {
     hidden: { clipPath: "inset(0 50% 0 50%)" },
@@ -319,16 +416,26 @@ export default function App() {
       className="min-h-screen w-full relative overflow-x-hidden"
       style={{ background: "#000" }}
     >
-      {showEmBreve && <EmBrevePopup onClose={() => setShowEmBreve(false)} />}
-      {/* UnicornStudio animated background */}
-      <UnicornBackground />
+      {/* Loading overlay — fades out once UnicornStudio signals ready */}
+      <AnimatePresence>
+        {!pageLoaded && (
+          <motion.div
+            className="fixed inset-0 bg-black"
+            style={{ zIndex: 99999 }}
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.55, ease: "easeInOut" }}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Centered content column */}
-      <div className="relative mx-auto flex flex-col items-center" style={{ maxWidth: 430 }}>
-        {/* Hero photo */}
-        <div className="relative w-full overflow-hidden" style={{ height: 320 }}>
-          {/* Fade to black at bottom */}
-        </div>
+      {showEmBreve && <EmBrevePopup onClose={() => setShowEmBreve(false)} />}
+      <UnicornBackground onReady={() => setPageLoaded(true)} />
+
+      {/* Content column */}
+      <div className="relative mx-auto flex flex-col items-center" style={{ maxWidth: 430, zIndex: 1 }}>
+        {/* Hero spacer */}
+        <div className="relative w-full overflow-hidden" style={{ height: 320 }} />
 
         {/* Name tag */}
         <div className="relative mt-4 mb-4">
@@ -336,7 +443,7 @@ export default function App() {
             className="bg-[rgba(18,160,250,0.34)] border border-solid border-white px-4 py-2"
             variants={revealVariants}
             initial="hidden"
-            animate="visible"
+            animate={pageLoaded ? "visible" : "hidden"}
             transition={revealTransition(0)}
           >
             <motion.p
@@ -344,7 +451,7 @@ export default function App() {
               style={{ fontFamily: "'Funnel Display', sans-serif", fontWeight: 600 }}
               variants={textVariants}
               initial="hidden"
-              animate="visible"
+              animate={pageLoaded ? "visible" : "hidden"}
               transition={textTransition(0.45)}
             >
               Leoaragão.1
@@ -353,59 +460,32 @@ export default function App() {
           <CornerBrackets color="#12a0fa" />
         </div>
 
-        {/* Cards section */}
+        {/* Cards */}
         <div className="w-full px-[37px] flex flex-col gap-[18px] pb-8">
-          {/* Diagnóstico IA */}
-          <motion.div
-            variants={revealVariants}
-            initial="hidden"
-            animate="visible"
-            transition={revealTransition(0.15)}
-          >
+          <motion.div variants={revealVariants} initial="hidden" animate={pageLoaded ? "visible" : "hidden"} transition={revealTransition(0.15)}>
             <ImageCard
               title="Diagnóstico IA"
               description="Agende sua reunião de analise de solução IA para sua empresa"
               bgImage={imgDiagnostico}
-              imgPosition={{
-                top: "-36.64%",
-                left: "31.28%",
-                width: "77.76%",
-                height: "150.4%",
-              }}
+              imgPosition={{ top: "-36.64%", left: "31.28%", width: "77.76%", height: "150.4%" }}
               borderColor="#2367f9"
               href="https://wa.me/5577981126262?text=Vim%20pelo%20instagram%20e%20quero%20solicitar%20consulta%20do%20meu%20projeto/empresa"
+              priority
             />
           </motion.div>
 
-          {/* Vanguarda.club */}
-          <motion.div
-            variants={revealVariants}
-            initial="hidden"
-            animate="visible"
-            transition={revealTransition(0.27)}
-          >
+          <motion.div variants={revealVariants} initial="hidden" animate={pageLoaded ? "visible" : "hidden"} transition={revealTransition(0.27)}>
             <ImageCard
               title="Vanguarda.club"
               description="Seu espaço de IA First, networking e conteúdo sobre IA e tecnologia aplicada para seu negócio"
               bgImage={imgVanguarda}
-              imgPosition={{
-                top: "-36.81%",
-                left: "-14.45%",
-                width: "128.9%",
-                height: "141.83%",
-              }}
+              imgPosition={{ top: "-36.81%", left: "-14.45%", width: "128.9%", height: "141.83%" }}
               borderColor="#12a0fa"
               href="https://vanguardaclub.vercel.app/waitlist.html"
             />
           </motion.div>
 
-          {/* Paperclip */}
-          <motion.div
-            variants={revealVariants}
-            initial="hidden"
-            animate="visible"
-            transition={revealTransition(0.39)}
-          >
+          <motion.div variants={revealVariants} initial="hidden" animate={pageLoaded ? "visible" : "hidden"} transition={revealTransition(0.39)}>
             <IconCard
               iconPath={svgPaths.p2b4f7c00}
               iconViewBox="0 0 35 32"
@@ -417,12 +497,8 @@ export default function App() {
             />
           </motion.div>
 
-          {/* Vanguarda.squads */}
           <motion.div
-            variants={revealVariants}
-            initial="hidden"
-            animate="visible"
-            transition={revealTransition(0.51)}
+            variants={revealVariants} initial="hidden" animate={pageLoaded ? "visible" : "hidden"} transition={revealTransition(0.51)}
             onClick={() => setShowEmBreve(true)}
             style={{ cursor: "pointer" }}
           >
@@ -436,12 +512,8 @@ export default function App() {
             />
           </motion.div>
 
-          {/* Hospedagem VPS */}
           <motion.div
-            variants={revealVariants}
-            initial="hidden"
-            animate="visible"
-            transition={revealTransition(0.63)}
+            variants={revealVariants} initial="hidden" animate={pageLoaded ? "visible" : "hidden"} transition={revealTransition(0.63)}
             onClick={() => setShowEmBreve(true)}
             style={{ cursor: "pointer" }}
           >
@@ -458,16 +530,8 @@ export default function App() {
 
         {/* Social icons */}
         <div className="flex gap-[13px] items-center justify-center mb-6">
-          {/* LinkedIn */}
-          <motion.a
-            href="https://www.linkedin.com/in/leoartmesh/"
-            target="_blank"
-            rel="noopener noreferrer"
-            variants={revealVariants}
-            initial="hidden"
-            animate="visible"
-            transition={revealTransition(0.75)}
-          >
+          <motion.a href="https://www.linkedin.com/in/leoartmesh/" target="_blank" rel="noopener noreferrer"
+            variants={revealVariants} initial="hidden" animate={pageLoaded ? "visible" : "hidden"} transition={revealTransition(0.75)}>
             <SocialIcon>
               <svg fill="none" viewBox="0 0 43 43" className="size-[43px]">
                 <path d={svgPaths.p32a6d780} fill="white" />
@@ -475,16 +539,8 @@ export default function App() {
             </SocialIcon>
           </motion.a>
 
-          {/* YouTube */}
-          <motion.a
-            href="https://www.youtube.com/@leoaragao_ia"
-            target="_blank"
-            rel="noopener noreferrer"
-            variants={revealVariants}
-            initial="hidden"
-            animate="visible"
-            transition={revealTransition(0.83)}
-          >
+          <motion.a href="https://www.youtube.com/@leoaragao1" target="_blank" rel="noopener noreferrer"
+            variants={revealVariants} initial="hidden" animate={pageLoaded ? "visible" : "hidden"} transition={revealTransition(0.83)}>
             <SocialIcon>
               <svg fill="none" viewBox="0 0 43 43" className="size-[43px]">
                 <path d={svgPaths.p1eef0100} fill="white" />
@@ -492,16 +548,8 @@ export default function App() {
             </SocialIcon>
           </motion.a>
 
-          {/* Instagram */}
-          <motion.a
-            href="https://www.instagram.com/leoaragao.1/"
-            target="_blank"
-            rel="noopener noreferrer"
-            variants={revealVariants}
-            initial="hidden"
-            animate="visible"
-            transition={revealTransition(0.91)}
-          >
+          <motion.a href="https://www.instagram.com/leoaragao.1/" target="_blank" rel="noopener noreferrer"
+            variants={revealVariants} initial="hidden" animate={pageLoaded ? "visible" : "hidden"} transition={revealTransition(0.91)}>
             <SocialIcon>
               <svg fill="none" viewBox="0 0 43 43" className="size-[43px]">
                 <path d={svgPaths.p28696172} fill="white" />
@@ -516,13 +564,13 @@ export default function App() {
           style={{ fontFamily: "'Funnel Display', sans-serif", fontWeight: 300 }}
           variants={textVariants}
           initial="hidden"
-          animate="visible"
+          animate={pageLoaded ? "visible" : "hidden"}
           transition={textTransition(1.0)}
         >
           Leonardo Aragão 2026
         </motion.p>
 
-        {/* Black bar to cover UnicornStudio watermark — scrolls with page, sits at page bottom */}
+        {/* Black bar — covers UnicornStudio watermark */}
         <div
           style={{
             width: "100vw",
