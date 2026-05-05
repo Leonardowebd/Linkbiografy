@@ -32,7 +32,7 @@ export default defineConfig({
   },
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
-  assetsInclude: ['**/*.svg', '**/*.csv'],
+  assetsInclude: ['**/*.svg', '**/*.csv', '**/*.webm'],
 
   build: {
     // Inline assets smaller than 4 KB (avoids extra round-trips for tiny files)

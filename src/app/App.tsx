@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Rectangle from "../imports/Rectangle15/Rectangle15";
 import imgDiagnostico from "figma:asset/219f36972a48af087aff464629a32bc21323d345.png";
@@ -7,6 +7,7 @@ import svgPaths from "../imports/Desktop1/svg-8r1b22f4xs";
 import hostingerSvg from "../imports/Vector/svg-fwepso0duv";
 import hostingerSvg2 from "../imports/Vector-1/svg-9qtctz56h5";
 import faviconSrc from "../imports/image-1.png";
+import bgVideo from "../imports/openai_flowers_remix_scene.webm";
 
 // ─── SEO + favicon injection ───────────────────────────────────────────────
 function useSEO() {
@@ -275,99 +276,23 @@ function EmBrevePopup({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ─── UnicornStudio background ──────────────────────────────────────────────
-function UnicornBackground({ onReady }: { onReady: () => void }) {
+// ─── Video background ──────────────────────────────────────────────────────
+function VideoBackground({ onReady }: { onReady: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   useEffect(() => {
-    // Hide watermark via CSS
-    const styleId = "us-hide-watermark";
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement("style");
-      style.id = styleId;
-      style.textContent = `
-        a[href*="unicornstudio"],
-        a[href*="unicorn.studio"],
-        [class*="watermark"],
-        [id*="watermark"],
-        [class*="badge"],
-        [id*="badge"],
-        [class*="branding"],
-        [id*="branding"] {
-          display: none !important;
-          opacity: 0 !important;
-          visibility: hidden !important;
-          pointer-events: none !important;
-        }
-      `;
-      document.head.appendChild(style);
-    }
+    const video = videoRef.current;
+    if (!video) return;
 
-    // MutationObserver to aggressively kill any injected watermark
-    const killWatermark = () => {
-      document.querySelectorAll("a, [class], [id]").forEach((el) => {
-        const href = (el as HTMLAnchorElement).href ?? "";
-        const cls = (el.className ?? "").toString().toLowerCase();
-        const id = (el.id ?? "").toLowerCase();
-        const text = (el.textContent ?? "").toLowerCase();
-        if (
-          href.includes("unicornstudio") ||
-          href.includes("unicorn.studio") ||
-          cls.includes("watermark") ||
-          cls.includes("branding") ||
-          cls.includes("badge") ||
-          id.includes("watermark") ||
-          id.includes("branding") ||
-          text.includes("unicorn.studio") ||
-          text.includes("made with unicorn")
-        ) {
-          (el as HTMLElement).style.cssText +=
-            "display:none!important;opacity:0!important;visibility:hidden!important;";
-          el.remove();
-        }
-      });
-    };
+    // Fire onReady as soon as the browser has enough data to start playing
+    const handleCanPlay = () => onReady();
+    video.addEventListener("canplay", handleCanPlay, { once: true });
 
-    const observer = new MutationObserver(killWatermark);
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-    killWatermark();
-
-    // Load UnicornStudio SDK once
-    const existingScript = document.getElementById("unicornstudio-script");
-    const initUS = () => {
-      const u = (window as any).UnicornStudio;
-      if (u && u.init) u.init();
-      // Signal app is ready to reveal
-      setTimeout(() => {
-        killWatermark();
-        onReady();
-      }, 400);
-      setTimeout(killWatermark, 1200);
-    };
-
-    if (existingScript) {
-      if ((window as any).UnicornStudio) {
-        initUS();
-      } else {
-        existingScript.addEventListener("load", initUS, { once: true });
-      }
-      return () => observer.disconnect();
-    }
-
-    const script = document.createElement("script");
-    script.id = "unicornstudio-script";
-    script.src =
-      "https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.1.11/dist/unicornStudio.umd.js";
-    script.async = true;
-    script.defer = true;
-    script.onload = initUS;
-    // Fallback: reveal even if script fails
-    script.onerror = () => { onReady(); observer.disconnect(); };
-    (document.head || document.body).appendChild(script);
-
-    // Safety fallback — reveal after 3 s regardless
-    const fallback = setTimeout(() => { killWatermark(); onReady(); }, 3000);
+    // Safety fallback — reveal after 4 s regardless
+    const fallback = setTimeout(() => onReady(), 4000);
 
     return () => {
-      observer.disconnect();
+      video.removeEventListener("canplay", handleCanPlay);
       clearTimeout(fallback);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -378,9 +303,23 @@ function UnicornBackground({ onReady }: { onReady: () => void }) {
       className="absolute inset-0 overflow-hidden pointer-events-none"
       style={{ zIndex: 0 }}
     >
-      <div
-        data-us-project="EgvoZC7eDXsErT3Z1FOQ"
-        style={{ width: "100%", height: "100%" }}
+      <video
+        ref={videoRef}
+        src={bgVideo}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center top",
+        }}
       />
     </div>
   );
@@ -416,7 +355,7 @@ export default function App() {
       className="min-h-screen w-full relative overflow-x-hidden"
       style={{ background: "#000" }}
     >
-      {/* Loading overlay — fades out once UnicornStudio signals ready */}
+      {/* Loading overlay */}
       <AnimatePresence>
         {!pageLoaded && (
           <motion.div
@@ -430,7 +369,7 @@ export default function App() {
       </AnimatePresence>
 
       {showEmBreve && <EmBrevePopup onClose={() => setShowEmBreve(false)} />}
-      <UnicornBackground onReady={() => setPageLoaded(true)} />
+      <VideoBackground onReady={() => setPageLoaded(true)} />
 
       {/* Content column */}
       <div className="relative mx-auto flex flex-col items-center" style={{ maxWidth: 430, zIndex: 1 }}>
