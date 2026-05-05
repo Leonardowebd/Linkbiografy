@@ -19,33 +19,44 @@ function figmaAssetResolver() {
 export default defineConfig({
   plugins: [
     figmaAssetResolver(),
-    // The React and Tailwind plugins are both required for Make, even if
-    // Tailwind is not being actively used – do not remove them
     react(),
     tailwindcss(),
   ],
   resolve: {
     alias: {
-      // Alias @ to the src directory
       '@': path.resolve(__dirname, './src'),
     },
   },
 
-  // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
-  assetsInclude: ['**/*.svg', '**/*.csv', '**/*.webm'],
+  assetsInclude: ['**/*.svg', '**/*.csv'],
 
   build: {
-    // Inline assets smaller than 4 KB (avoids extra round-trips for tiny files)
+    // Target modern browsers — smaller, faster output
+    target: 'es2020',
+
+    // Inline assets < 4 KB (avoids round-trips for tiny files)
     assetsInlineLimit: 4096,
-    // Produce a clean dist folder on every build
+
+    // Single CSS file — one fewer network request
+    cssCodeSplit: false,
+
+    // Clean dist on every build
     emptyOutDir: true,
+
+    // Skip compressed-size reporting — faster CI builds
+    reportCompressedSize: false,
+
     rollupOptions: {
       output: {
-        // Split vendor chunks so the browser can cache them independently
+        // Stable chunk names for better long-term caching
         manualChunks: {
-          react: ['react', 'react-dom'],
-          motion: ['motion'],
+          'vendor-react':  ['react', 'react-dom'],
+          'vendor-motion': ['motion'],
         },
+        // Hash-based asset names for cache busting
+        chunkFileNames:  'assets/[name]-[hash].js',
+        entryFileNames:  'assets/[name]-[hash].js',
+        assetFileNames:  'assets/[name]-[hash][extname]',
       },
     },
   },
