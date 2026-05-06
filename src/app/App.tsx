@@ -158,15 +158,29 @@ function UnicornBackground() {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }}>
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{ zIndex: 0 }}
+    >
       <div
         data-us-project={US_PROJECT}
         data-us-scale="cover"
         data-us-dpi="1.5"
         style={{ width: "100%", height: "100%" }}
       />
-      {/* Watermark cover */}
-      <div style={{ position: "absolute", bottom: 0, right: 0, width: 200, height: 48, background: "#000", zIndex: 99, pointerEvents: "none" }} />
+      {/* Patch preto sobre o canto da marca d'água */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          right: 0,
+          width: 220,
+          height: 52,
+          background: "#000",
+          zIndex: 99,
+          pointerEvents: "none",
+        }}
+      />
     </div>
   );
 }
@@ -195,7 +209,7 @@ function SocialIcon({ children }: { children: React.ReactNode }) {
   );
 }
 
-// ─── Image card ────────────────────────────────────────────────────────────
+// ─── Image card ───────────────────────────────────────────────────────────
 const CARD_GRADIENT_BIG = "url('data:image/svg+xml;utf8,<svg viewBox=\\'0 0 356 182\\' xmlns=\\'http://www.w3.org/2000/svg\\' preserveAspectRatio=\\'none\\'><rect x=\\'0\\' y=\\'0\\' height=\\'100%\\' width=\\'100%\\' fill=\\'url(%23grad)\\' opacity=\\'1\\'/><defs><radialGradient id=\\'grad\\' gradientUnits=\\'userSpaceOnUse\\' cx=\\'0\\' cy=\\'0\\' r=\\'10\\' gradientTransform=\\'matrix(-12.95 30.45 -59.562 -25.331 374 -42.5)\\'><stop stop-color=\\'rgba(18,160,250,0)\\' offset=\\'0.091597\\'/><stop stop-color=\\'rgba(0,87,226,1)\\' offset=\\'0.58789\\'/></radialGradient></defs></svg>')";
 const CARD_GRADIENT_SM  = "url('data:image/svg+xml;utf8,<svg viewBox=\\'0 0 356 118\\' xmlns=\\'http://www.w3.org/2000/svg\\' preserveAspectRatio=\\'none\\'><rect x=\\'0\\' y=\\'0\\' height=\\'100%\\' width=\\'100%\\' fill=\\'url(%23grad)\\' opacity=\\'1\\'/><defs><radialGradient id=\\'grad\\' gradientUnits=\\'userSpaceOnUse\\' cx=\\'0\\' cy=\\'0\\' r=\\'10\\' gradientTransform=\\'matrix(-12.95 19.742 -59.562 -16.423 374 -27.555)\\'><stop stop-color=\\'rgba(18,160,250,0)\\' offset=\\'0.091597\\'/><stop stop-color=\\'rgba(0,87,226,1)\\' offset=\\'0.58789\\'/></radialGradient></defs></svg>')";
 
