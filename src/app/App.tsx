@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import Rectangle from "../imports/Rectangle15/Rectangle15";
 import imgDiagnostico from "figma:asset/219f36972a48af087aff464629a32bc21323d345.png";
@@ -77,23 +77,7 @@ function useSEO() {
     if (!appleIcon) { appleIcon = document.createElement("link"); appleIcon.rel = "apple-touch-icon"; document.head.appendChild(appleIcon); }
     appleIcon.href = faviconSrc;
 
-    // Preconnect — jsDelivr (UnicornStudio SDK) + Google Fonts
-    const origins = [
-      { href: "https://cdn.jsdelivr.net",    co: true  },
-      { href: "https://fonts.googleapis.com", co: false },
-      { href: "https://fonts.gstatic.com",    co: true  },
-    ];
-    origins.forEach(({ href, co }) => {
-      if (!document.querySelector(`link[rel="dns-prefetch"][href="${href}"]`)) {
-        const d = document.createElement("link"); d.rel = "dns-prefetch"; d.href = href;
-        document.head.prepend(d);
-      }
-      if (!document.querySelector(`link[rel="preconnect"][href="${href}"]`)) {
-        const l = document.createElement("link"); l.rel = "preconnect"; l.href = href;
-        if (co) l.crossOrigin = "anonymous";
-        document.head.prepend(l);
-      }
-    });
+    // preconnect + preload handled statically in index.html
   }, []);
 }
 
